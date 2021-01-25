@@ -48,7 +48,7 @@ process countKMers {
 
   script:
   """
-  jellyfish count --size=15G --mer-len=${params.kmer} --threads=${task.cpus} --output=counts.jf ${canonical} --out-counter-len=2 /dev/stdin
+  jellyfish count --size=15G --mer-len=${params.kmer} --threads=${task.cpus} --output=counts.jf ${canonical} --out-counter-len=2 ${fastqfile}
   """
 }
 
@@ -59,6 +59,8 @@ ch_counts
   .set { ch_counts_list }
 
 process mergeCounts {
+
+  publishDir "./results"
 
   input:
     file(list) from ch_counts_list
@@ -75,6 +77,8 @@ process mergeCounts {
 
 process buildHistogram {
 
+  publishDir "./results"
+
   input:
     file(counts) from ch_merged_counts
 
@@ -83,6 +87,6 @@ process buildHistogram {
 
   script:
   """
-  jellyfish histo --threads=${task.cpus} --output=counts.hist
+  jellyfish histo --threads=${task.cpus} --output=counts.hist ${counts}
   """
 }
